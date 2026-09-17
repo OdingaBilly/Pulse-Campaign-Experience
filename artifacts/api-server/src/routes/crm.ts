@@ -361,9 +361,20 @@ router.patch("/crm/tasks/:id", async (req, res): Promise<void> => {
     res.status(400).json({ error: "Invalid task update" });
     return;
   }
+  const { dueDate, ...taskUpdate } = parsed.data;
   const [task] = await db
     .update(crmTasksTable)
-    .set({ ...parsed.data, updatedAt: new Date() })
+    .set({
+      ...taskUpdate,
+      ...(dueDate !== undefined
+        ? {
+            dueDate: dueDate
+              ? dueDate.toISOString().slice(0, 10)
+              : null,
+          }
+        : {}),
+      updatedAt: new Date(),
+    })
     .where(eq(crmTasksTable.id, params.data.id))
     .returning();
   if (!task) {
@@ -375,7 +386,7 @@ router.patch("/crm/tasks/:id", async (req, res): Promise<void> => {
     type: "task.updated",
     entity: "task",
     entityId: output.id,
-    occurredAt: output.updatedAt,
+    occurredAt: eventTime(output.updatedAt),
   });
   res.json(output);
 });
@@ -410,7 +421,7 @@ router.post("/community/signals", async (req, res): Promise<void> => {
     type: "signal.created",
     entity: "signal",
     entityId: output.id,
-    occurredAt: output.updatedAt,
+    occurredAt: eventTime(output.updatedAt),
   });
   res.status(201).json(output);
 });
@@ -442,7 +453,7 @@ router.patch("/community/signals/:id", async (req, res): Promise<void> => {
     type: "signal.updated",
     entity: "signal",
     entityId: output.id,
-    occurredAt: output.updatedAt,
+    occurredAt: eventTime(output.updatedAt),
   });
   res.json(output);
 });
