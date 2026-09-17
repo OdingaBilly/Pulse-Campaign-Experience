@@ -105,11 +105,21 @@
 
 @layer base {
   * { @apply border-border; }
-  html { scroll-behavior: smooth; }
+  html {
+    scroll-behavior: smooth;
+    min-width: 320px;
+    background: hsl(var(--background));
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
   body {
     @apply font-sans antialiased bg-background text-foreground;
-    min-width: 320px;
+    min-height: 100svh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    padding-bottom: env(safe-area-inset-bottom);
   }
+  img, svg, video, canvas { max-width: 100%; }
   button, a, input, textarea, select { outline: none; }
   :focus-visible { box-shadow: 0 0 0 3px hsl(var(--accent) / 0.45); }
 }

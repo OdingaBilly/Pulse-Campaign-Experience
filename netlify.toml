@@ -1,0 +1,12 @@
+[build]
+  command = "pnpm install --frozen-lockfile && pnpm --filter @workspace/pulse run build"
+  publish = "artifacts/pulse/dist/public"
+
+[build.environment]
+  NODE_VERSION = "24"
+  NPM_FLAGS = "--version"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

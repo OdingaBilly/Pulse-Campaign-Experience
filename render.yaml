@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: pulse
+    runtime: static
+    buildCommand: pnpm install --frozen-lockfile && pnpm --filter @workspace/pulse run build
+    staticPublishPath: artifacts/pulse/dist/public
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    buildFilter:
+      paths:
+        - artifacts/pulse/**
+        - package.json
+        - pnpm-lock.yaml
+        - pnpm-workspace.yaml
