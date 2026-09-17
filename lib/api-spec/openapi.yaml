@@ -10,6 +10,10 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: crm
+    description: Campaign manager CRM operations
+  - name: community
+    description: Community participation operations
 paths:
   /healthz:
     get:
@@ -24,7 +28,205 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /crm/overview:
+    get:
+      operationId: getCrmOverview
+      tags: [crm]
+      summary: Get the campaign CRM overview
+      responses:
+        "200":
+          description: CRM overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CrmOverview"
+  /crm/contacts:
+    get:
+      operationId: listCrmContacts
+      tags: [crm]
+      summary: List campaign contacts
+      responses:
+        "200":
+          description: Contacts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CrmContact"
+    post:
+      operationId: createCrmContact
+      tags: [crm]
+      summary: Create a campaign contact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CrmContactInput"
+      responses:
+        "201":
+          description: Created contact
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CrmContact"
+  /crm/contacts/{id}:
+    patch:
+      operationId: updateCrmContact
+      tags: [crm]
+      summary: Update a campaign contact
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CrmContactUpdate"
+      responses:
+        "200":
+          description: Updated contact
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CrmContact"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /crm/tasks:
+    get:
+      operationId: listCrmTasks
+      tags: [crm]
+      summary: List campaign tasks
+      responses:
+        "200":
+          description: Tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CrmTask"
+    post:
+      operationId: createCrmTask
+      tags: [crm]
+      summary: Create a campaign task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CrmTaskInput"
+      responses:
+        "201":
+          description: Created task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CrmTask"
+  /crm/tasks/{id}:
+    patch:
+      operationId: updateCrmTask
+      tags: [crm]
+      summary: Update a campaign task
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CrmTaskUpdate"
+      responses:
+        "200":
+          description: Updated task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CrmTask"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /community/signals:
+    get:
+      operationId: listCommunitySignals
+      tags: [community]
+      summary: List community signals for the shared campaign picture
+      responses:
+        "200":
+          description: Community signals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CommunitySignal"
+    post:
+      operationId: createCommunitySignal
+      tags: [community]
+      summary: Submit a privacy-forward community signal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommunitySignalInput"
+      responses:
+        "201":
+          description: Created signal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunitySignal"
+  /community/signals/{id}:
+    patch:
+      operationId: updateCommunitySignal
+      tags: [community]
+      summary: Triage a community signal
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommunitySignalUpdate"
+      responses:
+        "200":
+          description: Updated signal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunitySignal"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /crm/stream:
+    get:
+      operationId: streamCrmEvents
+      tags: [crm]
+      summary: Stream CRM and community changes
+      responses:
+        "200":
+          description: Server-sent event stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
 components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +235,129 @@ components:
           type: string
       required:
         - status
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    CrmContact:
+      type: object
+      required: [id, name, role, area, affiliation, status, engagementScore, lastContactedAt, nextAction, notes, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        role: { type: string }
+        area: { type: string }
+        affiliation: { type: string }
+        status: { type: string, enum: [lead, active, partner, dormant] }
+        engagementScore: { type: integer }
+        lastContactedAt: { type: ["string", "null"], format: date-time }
+        nextAction: { type: string }
+        notes: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    CrmContactInput:
+      type: object
+      required: [name, role, area, affiliation, status, engagementScore, nextAction, notes]
+      properties:
+        name: { type: string, minLength: 1 }
+        role: { type: string, minLength: 1 }
+        area: { type: string, minLength: 1 }
+        affiliation: { type: string, minLength: 1 }
+        status: { type: string, enum: [lead, active, partner, dormant] }
+        engagementScore: { type: integer, minimum: 0, maximum: 100 }
+        lastContactedAt: { type: ["string", "null"], format: date-time }
+        nextAction: { type: string }
+        notes: { type: string }
+    CrmContactUpdate:
+      type: object
+      properties:
+        status: { type: string, enum: [lead, active, partner, dormant] }
+        engagementScore: { type: integer, minimum: 0, maximum: 100 }
+        lastContactedAt: { type: ["string", "null"], format: date-time }
+        nextAction: { type: string }
+        notes: { type: string }
+    CrmTask:
+      type: object
+      required: [id, title, status, priority, dueDate, owner, contactId, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        status: { type: string, enum: [todo, in-progress, done] }
+        priority: { type: string, enum: [low, medium, high] }
+        dueDate: { type: ["string", "null"], format: date }
+        owner: { type: string }
+        contactId: { type: ["integer", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    CrmTaskInput:
+      type: object
+      required: [title, status, priority, owner]
+      properties:
+        title: { type: string, minLength: 1 }
+        status: { type: string, enum: [todo, in-progress, done] }
+        priority: { type: string, enum: [low, medium, high] }
+        dueDate: { type: ["string", "null"], format: date }
+        owner: { type: string, minLength: 1 }
+        contactId: { type: ["integer", "null"] }
+    CrmTaskUpdate:
+      type: object
+      properties:
+        status: { type: string, enum: [todo, in-progress, done] }
+        priority: { type: string, enum: [low, medium, high] }
+        dueDate: { type: ["string", "null"], format: date }
+        owner: { type: string }
+        contactId: { type: ["integer", "null"] }
+    CommunitySignal:
+      type: object
+      required: [id, area, summary, status, source, communityVisible, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        area: { type: string }
+        summary: { type: string }
+        status: { type: string, enum: [new, triaged, in-progress, resolved] }
+        source: { type: string }
+        communityVisible: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    CommunitySignalInput:
+      type: object
+      required: [area, summary]
+      properties:
+        area: { type: string, minLength: 1 }
+        summary: { type: string, minLength: 1, maxLength: 1000 }
+    CommunitySignalUpdate:
+      type: object
+      properties:
+        status: { type: string, enum: [new, triaged, in-progress, resolved] }
+        communityVisible: { type: boolean }
+    CrmSummary:
+      type: object
+      required: [totalContacts, activeContacts, openTasks, highPriorityTasks, newSignals, averageEngagement]
+      properties:
+        totalContacts: { type: integer }
+        activeContacts: { type: integer }
+        openTasks: { type: integer }
+        highPriorityTasks: { type: integer }
+        newSignals: { type: integer }
+        averageEngagement: { type: integer }
+    CrmOverview:
+      type: object
+      required: [summary, contacts, tasks, signals]
+      properties:
+        summary:
+          $ref: "#/components/schemas/CrmSummary"
+        contacts:
+          type: array
+          items:
+            $ref: "#/components/schemas/CrmContact"
+        tasks:
+          type: array
+          items:
+            $ref: "#/components/schemas/CrmTask"
+        signals:
+          type: array
+          items:
+            $ref: "#/components/schemas/CommunitySignal"
 
