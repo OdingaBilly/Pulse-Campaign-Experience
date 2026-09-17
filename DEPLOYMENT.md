@@ -18,6 +18,16 @@ Static output:
 artifacts/pulse/dist/public
 ```
 
+Before publishing, run the deployment smoke check:
+
+```bash
+pnpm run test:deployment
+```
+
+It builds Pulse without Replit-only environment variables, validates the
+provider configuration files, checks the generated entry files, and verifies
+SPA fallback responses through the production static server.
+
 ## Providers
 
 - **Replit:** managed by `artifacts/pulse/.replit-artifact/artifact.toml`.
