@@ -1,10 +1,10 @@
-# [Project name]
+# Pulse Campaign Experience
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Pulse is a shared campaign operating system with an operational control room for campaign teams and an approachable community portal for residents and participants.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/pulse run dev` — run the Pulse web app through the managed workflow
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
@@ -22,23 +22,34 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/pulse/src/App.tsx` — route-aware app shell, landing page, Mission Control, and Community Portal
+- `artifacts/pulse/src/data/repository.ts` — typed synthetic campaign repository and shared domain contracts
+- `artifacts/pulse/src/index.css` — Pulse visual tokens, typography, global reset, and reduced-motion rules
+- `attached_assets/` — supplied Pulse wordmark reference asset
+- `lib/api-spec/openapi.yaml` — shared API source of truth for future kernel-backed phases
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Phase 1 keeps data local and synthetic; the UI reads through repository functions so a future Pulse Kernel adapter can replace the source without rewriting presentation.
+- `/control` and `/community` share the same campaign vocabulary and domain objects but expose different levels of operational detail.
+- Community interactions are intentionally aggregate-only and privacy-forward; no participant profiles, political preferences, or individualized targeting are represented.
+- The visual system favors editorial hierarchy, deliberate whitespace, thin borders, and restrained motion over dense dashboard chrome.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Landing page entry point with Mission Control and Community Portal paths
+- Campaign Pulse score, operational metrics, current reality signals, regional coverage, project pipeline, and decision timeline
+- Public campaign vision, projects, progress states, aggregate polls, events, and private signal submission
+- Responsive behavior for desktop, tablet, and mobile with visible focus states and reduced-motion support
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+Keep Pulse calm, editorial, and information-first. Avoid generic SaaS dashboard patterns.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- This first phase is synthetic and disconnected from the API server by design; do not imply real campaign or participant data.
+- If backend integration is added later, preserve the repository boundary and shared contract names.
 
 ## Pointers
 

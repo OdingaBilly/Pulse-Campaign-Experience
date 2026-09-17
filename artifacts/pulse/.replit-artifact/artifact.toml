@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Pulse Campaign Experience"
+description = "A calm operational campaign control room and community portal built on synthetic data, with shared Pulse navigation, visual language, and transparent participation flows."
+version = "1.0.0"
+id = "artifacts/pulse"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23821
+
+[services.development]
+run = "pnpm --filter @workspace/pulse run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/pulse", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/pulse/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23821"
+BASE_PATH = "/"
