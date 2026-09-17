@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowLeft, ArrowRight, ArrowUpRight, BarChart3, CalendarDays, Check,
@@ -69,7 +69,7 @@ function Landing() {
         <header className="flex items-center justify-between border-b border-white/15 py-6">
           <Logo invert />
           <div className="hidden items-center gap-6 font-mono text-[10px] uppercase tracking-[0.16em] text-[#9bb3ac] sm:flex">
-            <span>Northstar 2026</span><span className="h-1 w-1 rounded-full bg-[#6bd49d]" /><span>Harbor County</span>
+            <span>Homabay 2026</span><span className="h-1 w-1 rounded-full bg-[#6bd49d]" /><span>Homabay County</span>
           </div>
           <Link href="/community" className="text-sm text-[#d7e1d8] transition-colors hover:text-[#6bd49d]" data-testid="link-landing-community">Enter community <ArrowUpRight className="ml-1 inline h-4 w-4" /></Link>
         </header>
@@ -87,7 +87,7 @@ function Landing() {
             <div className="absolute -left-5 top-0 hidden h-full w-px bg-white/15 lg:block" />
             <div className="relative mx-auto max-w-md border border-white/20 bg-[#173d38] p-5 sm:p-7">
               <div className="flex items-start justify-between border-b border-white/15 pb-5">
-                <div><Eyebrow light>Live campaign pulse</Eyebrow><p className="mt-3 font-serif text-3xl">Northstar</p></div>
+                <div><Eyebrow light>Live campaign pulse</Eyebrow><p className="mt-3 font-serif text-3xl">Homabay</p></div>
                 <span className="font-mono text-[10px] text-[#9bb3ac]">08:42 / TODAY</span>
               </div>
               <div className="grid grid-cols-[1fr_auto] items-end gap-6 py-8">
@@ -118,14 +118,21 @@ function Landing() {
 function AppShell({ children, mode }: { children: ReactNode; mode: 'control' | 'community' }) {
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const controlNav = [{ href: '/control', icon: Gauge, label: 'Overview' }, { href: '/control#reality', icon: Compass, label: 'Current reality' }, { href: '/control#projects', icon: FolderKanban, label: 'Projects' }, { href: '/control#issues', icon: CircleAlert, label: 'Open issues' }, { href: '/control#coverage', icon: Globe2, label: 'Coverage' }];
+  const [hash, setHash] = useState(() => typeof window === 'undefined' ? '' : window.location.hash);
+  useEffect(() => {
+    const updateHash = () => setHash(window.location.hash);
+    window.addEventListener('hashchange', updateHash);
+    return () => window.removeEventListener('hashchange', updateHash);
+  }, []);
+  const controlNav = [{ href: '/control', icon: Gauge, label: 'Overview' }, { href: '/control#reality', icon: Compass, label: 'Current reality' }, { href: '/control#projects', icon: FolderKanban, label: 'Projects' }, { href: '/control#reality', icon: CircleAlert, label: 'Open issues' }, { href: '/control#coverage', icon: Globe2, label: 'Coverage' }];
   const communityNav = [{ href: '/community', icon: Sparkles, label: 'At a glance' }, { href: '/community#projects', icon: FolderKanban, label: 'Projects' }, { href: '/community#listen', icon: MessageSquare, label: 'Have your say' }, { href: '/community#events', icon: CalendarDays, label: 'Events' }];
   const nav = mode === 'control' ? controlNav : communityNav;
+  const currentHref = hash ? `${location}${hash}` : location;
   return <div className="grain min-h-[100dvh] bg-[#f1efe8] text-[#102c2b]">
     <aside className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-[#102c2b] px-5 py-6 text-[#f5f1e9] transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
       <div className="flex items-center justify-between"><Logo invert /><button onClick={() => setMobileOpen(false)} className="rounded p-1 text-[#9bb3ac] hover:text-white lg:hidden" aria-label="Close navigation" data-testid="button-close-navigation"><X className="h-5 w-5" /></button></div>
       <div className="mt-12"><Eyebrow light>{mode === 'control' ? 'Mission control' : 'Community portal'}</Eyebrow><p className="mt-3 font-serif text-2xl">{campaign.name}</p><p className="mt-1 text-xs text-[#9bb3ac]">{campaign.location} · {campaign.cycle}</p></div>
-      <nav className="mt-12 space-y-1" aria-label="Primary navigation">{nav.map(({ href, icon: Icon, label }) => <Link key={href} href={href} onClick={() => setMobileOpen(false)} className={`flex items-center gap-3 border-l-2 px-3 py-3 text-sm transition-colors ${location === href ? 'border-[#6bd49d] bg-white/10 text-white' : 'border-transparent text-[#9bb3ac] hover:bg-white/5 hover:text-white'}`} data-testid={`link-${mode}-${label.toLowerCase().replaceAll(' ', '-')}`}><Icon className="h-4 w-4" />{label}</Link>)}</nav>
+      <nav className="mt-12 space-y-1" aria-label="Primary navigation">{nav.map(({ href, icon: Icon, label }) => <Link key={`${href}-${label}`} href={href} onClick={() => setMobileOpen(false)} className={`flex items-center gap-3 border-l-2 px-3 py-3 text-sm transition-colors ${currentHref === href ? 'border-[#6bd49d] bg-white/10 text-white' : 'border-transparent text-[#9bb3ac] hover:bg-white/5 hover:text-white'}`} data-testid={`link-${mode}-${label.toLowerCase().replaceAll(' ', '-')}`}><Icon className="h-4 w-4" />{label}</Link>)}</nav>
       <div className="mt-auto border-t border-white/15 pt-5"><div className="flex items-center gap-3"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#6bd49d] font-mono text-xs text-[#102c2b]">MC</span><div><p className="text-xs text-[#f5f1e9]">{mode === 'control' ? 'Maya Chen' : 'A neighbor'}</p><p className="font-mono text-[9px] uppercase tracking-[0.1em] text-[#6e9388]">{mode === 'control' ? 'Campaign team' : 'Private session'}</p></div></div></div>
     </aside>
     {mobileOpen && <button className="fixed inset-0 z-30 bg-[#102c2b]/45 lg:hidden" onClick={() => setMobileOpen(false)} aria-label="Close menu overlay" data-testid="button-menu-overlay" />}
@@ -211,6 +218,38 @@ function RoutedErrorBoundary({ children }: { children: ReactNode }) {
 }
 
 function App() {
+  useEffect(() => {
+    const replacements = [
+      ['Northstar 2026', 'Homabay 2026'],
+      ['Northstar', 'Homabay'],
+      ['Harbor County', 'Homabay County'],
+      ['Harbor Loop', 'Homa Bay Connector'],
+      ['South Harbor', 'Mbita'],
+      ['Willow Creek', 'Rusinga'],
+      ['Old Market', 'Ndhiwa'],
+      ['North Ridge', 'Rangwe'],
+      ['Market Street', 'Kendu Bay'],
+      ['Tuesday / 19 August 2025', 'Thursday / 17 September 2026'],
+    ] as const;
+    const localize = () => {
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      const textNodes: Text[] = [];
+      let node = walker.nextNode();
+      while (node) {
+        textNodes.push(node as Text);
+        node = walker.nextNode();
+      }
+      for (const textNode of textNodes) {
+        let text = textNode.nodeValue ?? '';
+        for (const [source, target] of replacements) text = text.replaceAll(source, target);
+        if (text !== textNode.nodeValue) textNode.nodeValue = text;
+      }
+    };
+    localize();
+    const observer = new MutationObserver(localize);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
   return <QueryClientProvider client={queryClient}><TooltipProvider><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><RoutedErrorBoundary><Router /></RoutedErrorBoundary></WouterRouter><Toaster /></TooltipProvider></QueryClientProvider>;
 }
 
